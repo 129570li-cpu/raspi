@@ -1,20 +1,18 @@
 #include <iostream>
 #include <sys/utsname.h>
-// TIP 要<b>Run</b>代码，请按 <shortcut actionId="Run"/> 或点击装订区域中的
-// <icon src="AllIcons.Actions.Execute"/> 图标。
 
+#include "network/TcpServer.h"
 int main() {
   // TIP 当文本光标位于 <b>lang</b> 变量名称处时，按 <shortcut
   // actionId="RenameElement"/> 可以查看 CLion 如何帮助您重命名该变量。
 
-  utsname info{};
+  TcpServer server(9000);
 
-  if (uname(&info) != 0) {
+  if (!server.start()) {
     return 1;
   }
 
-  std::cout << "Hostname: " << info.nodename << '\n';
-  std::cout << "Architecture: " << info.machine << '\n';
+  server.run();
 
   return 0;
   // TIP 请访问 <a
