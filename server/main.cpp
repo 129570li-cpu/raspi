@@ -15,8 +15,4 @@ int main() {
   server.run();
 
   return 0;
-  // TIP 请访问 <a
-  // href="https://www.jetbrains.com/help/clion/">jetbrains.com/help/clion/</a>
-  // 查看 CLion 帮助。此外，您还可以从主菜单中选择“帮助 | 学习 IDE 功能”，尝试
-  // CLion 的交互式课次。
 }

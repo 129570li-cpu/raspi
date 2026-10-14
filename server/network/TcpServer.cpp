@@ -9,6 +9,30 @@
 #include <cerrno>
 #include <cstring>
 #include<iostream>
+namespace
+{
+  bool sendAll(int fd, const char* data, std::size_t length)
+  {
+    size_t totalSent = 0;
+    while (totalSent < length)
+    {
+      ssize_t n=send(fd, data+totalSent, length-totalSent, 0);
+      if (n>0)
+      {
+        totalSent+=n;
+      }
+      else if (n < 0 && errno == EINTR)
+      {
+        continue;
+      }
+      else
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+}
 TcpServer::TcpServer(std::uint16_t port)
     : port_(port)
 {
@@ -83,57 +107,53 @@ sockaddr_in serverAddr{};
 
 void TcpServer::run()
 {
-  if (listenFd_ < 0) {
-    std::cerr << "Server not started\n";
-    return;
-  }
-
-  sockaddr_in clientAddr{};
-  socklen_t clientLen = sizeof(clientAddr);
-
-  // 等待客户端连接
-  int clientFd = accept(
-      listenFd_,
-      reinterpret_cast<sockaddr*>(&clientAddr),
-      &clientLen
-  );
-
-  if (clientFd < 0) {
-    std::cerr << "accept failed: "
-              << std::strerror(errno) << '\n';
-    return;
-  }
-
-  std::cout << "Client connected\n";
-
-  char buffer[1024]{};
-
-  // 接收一次客户端数据
-  ssize_t n = recv(clientFd, buffer,
-                   sizeof(buffer), 0);
-
-  if (n > 0) {
-    std::cout << "Received: ";
-    std::cout.write(buffer, n);
-    std::cout << '\n';
-
-    const char response[] = "PONG";
-
-    ssize_t sent = send(
-        clientFd,
-        response,
-        sizeof(response) - 1,
-        0
-    );
-
-    if (sent < 0) {
-      std::cerr << "send failed: "
-                << std::strerror(errno) << '\n';
+  while (true)
+  {
+    if (listenFd_ < 0) {
+      std::cerr << "Server not started\n";
+      return;
     }
-  } else if (n < 0) {
-    std::cerr << "recv failed: "
-              << std::strerror(errno) << '\n';
-  }
 
-  close(clientFd);
+    sockaddr_in clientAddr{};
+    socklen_t clientLen = sizeof(clientAddr);
+    int clientFD=accept(listenFd_,reinterpret_cast<sockaddr*>(&clientAddr),&clientLen);
+    if (clientFD < 0)
+    {
+      if (errno == EINTR)
+        continue;
+
+      std::cerr << "accept failed: "
+                << std::strerror(errno) << '\n';
+      return;
+    }
+    char buffer[1024];
+    while (true)
+    {
+      ssize_t n=recv(clientFD,buffer,sizeof(buffer),0);
+      if (n<0)
+      {
+        if (errno == EINTR)
+          continue;
+
+        std::cerr << "recv failed: "
+                  << std::strerror(errno) << '\n';
+
+        break;
+      }
+      if (n>0)
+      {
+        if (!sendAll(clientFD, buffer, static_cast<std::size_t>(n)))
+        {
+          std::cerr << "sendAll failed\n";
+          break;
+        }
+      }
+      else
+      {
+        std::cout << "Client disconnected\n";
+        break;
+      }
+    }
+    close(clientFD);
+  }
 }

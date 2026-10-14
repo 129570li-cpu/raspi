@@ -20,7 +20,6 @@ public:
   bool start();
   void run();
   void stop();
-
 private:
   std::uint16_t port_;
   int listenFd_ = -1;
