@@ -1,7 +1,8 @@
 //
 // Created by 李玉辉 on 2026/10/13.
 //
-
+#include <string>
+#include <string_view>
 #include "TcpServer.h"
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -9,6 +10,7 @@
 #include <cerrno>
 #include <cstring>
 #include<iostream>
+using std::string;
 namespace
 {
   bool sendAll(int fd, const char* data, std::size_t length)
@@ -31,6 +33,15 @@ namespace
       }
     }
     return true;
+  }
+  std::string processCommand(std::string_view command)
+  {
+    if (command == "PING")
+    {
+      return "PONG\n";
+    }
+
+    return "UNKNOWN\n";
   }
 }
 TcpServer::TcpServer(std::uint16_t port)
@@ -127,6 +138,7 @@ void TcpServer::run()
       return;
     }
     char buffer[1024];
+    string pending;
     while (true)
     {
       ssize_t n=recv(clientFD,buffer,sizeof(buffer),0);
@@ -142,10 +154,40 @@ void TcpServer::run()
       }
       if (n>0)
       {
-        if (!sendAll(clientFD, buffer, static_cast<std::size_t>(n)))
+        pending.append(buffer, static_cast<std::size_t>(n));
+        while (true)
         {
-          std::cerr << "sendAll failed\n";
-          break;
+          std::size_t pos = pending.find('\n');
+
+          if (pos == std::string::npos)
+          {
+            // 还没有完整的一行，等待下一次 recv
+            break;
+          }
+
+          // 3. 提取一条完整命令，不包含 '\n'
+          std::string command = pending.substr(0, pos);
+
+          // 4. 从 pending 中删除已经处理的命令和换行符
+          pending.erase(0, pos + 1);
+
+          // 兼容 Windows 常见的 \r\n 换行
+          if (!command.empty() && command.back() == '\r')
+          {
+            command.pop_back();
+          }
+
+          // 5. 根据命令生成响应
+          std::string response = processCommand(command);
+
+          std::cout << "Command: " << command << '\n';
+
+          // 6. 将完整响应发送给客户端
+          if (!sendAll(clientFD, response.data(), response.size()))
+          {
+            std::cerr << "sendAll failed\n";
+            break;
+          }
         }
       }
       else
