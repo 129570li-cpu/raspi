@@ -10,6 +10,7 @@
 #include <cerrno>
 #include <cstring>
 #include<iostream>
+constexpr std::size_t MAX_COMMAND_LENGTH = 4096;
 using std::string;
 namespace
 {
@@ -139,6 +140,7 @@ void TcpServer::run()
     }
     char buffer[1024];
     string pending;
+    bool keepConnection =true;
     while (true)
     {
       ssize_t n=recv(clientFD,buffer,sizeof(buffer),0);
@@ -161,10 +163,20 @@ void TcpServer::run()
 
           if (pos == std::string::npos)
           {
+            if (pending.size() > MAX_COMMAND_LENGTH)
+            {
+              std::cerr << "Command too long\n";
+              keepConnection = false;
+            }
             // 还没有完整的一行，等待下一次 recv
             break;
           }
-
+          if (pos>MAX_COMMAND_LENGTH)
+          {
+            std::cerr << "pending too long: \n";
+            keepConnection=false;
+            break;
+          }
           // 3. 提取一条完整命令，不包含 '\n'
           std::string command = pending.substr(0, pos);
 
@@ -186,8 +198,13 @@ void TcpServer::run()
           if (!sendAll(clientFD, response.data(), response.size()))
           {
             std::cerr << "sendAll failed\n";
+            keepConnection =false;
             break;
           }
+        }
+        if (keepConnection ==false)
+        {
+          break;
         }
       }
       else
