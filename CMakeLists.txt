@@ -13,13 +13,6 @@ if(BUILD_CHATROOM)
     add_subdirectory(chatroom)
 endif()
 
-if(BUILD_CLIENT)
-    add_subdirectory(client)
-endif()
 
-if(BUILD_SERVER)
-    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        message(FATAL_ERROR "Server requires Linux")
-    endif()
-    add_subdirectory(server)
-endif()
+
+
