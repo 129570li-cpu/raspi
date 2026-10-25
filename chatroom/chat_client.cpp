@@ -148,14 +148,6 @@ int main(int argc, char* argv[])
 
     boost::asio::io_context io_context;
 
-    const char* s = u8"服务器返回";
-
-    for (const unsigned char* p =
-             reinterpret_cast<const unsigned char*>(s); *p; ++p)
-    {
-      std::printf("%02X ", *p);
-    }
-    std::printf("\n");
     tcp::resolver resolver(io_context);
     auto endpoints = resolver.resolve(argv[1], argv[2]);
     chat_client c(io_context, endpoints);

@@ -17,7 +17,7 @@
 #include <utility>
 #include <boost/asio.hpp>
 #include "chat_message.hpp"
-
+#include "Request_Handler.h"
 using boost::asio::ip::tcp;
 
 //----------------------------------------------------------------------
@@ -97,6 +97,27 @@ public:
     }
   }
 
+
+  void send_response(const std::string& response)
+  {
+    if (response.size() > chat_message::max_body_length)
+      return;
+
+    chat_message msg;
+
+    msg.body_length(response.size());
+
+    std::memcpy(
+        msg.body(),
+        response.data(),
+        response.size()
+    );
+
+    msg.encode_header();
+
+    deliver(msg);
+  }
+
 private:
   void do_read_header()
   {
@@ -125,7 +146,9 @@ private:
         {
           if (!ec)
           {
-            room_.deliver(read_msg_);
+            std::string request(read_msg_.body(), read_msg_.body_length());
+            std::string response = handler_.handle(request);
+            send_response(response);
             do_read_header();
           }
           else
@@ -162,6 +185,7 @@ private:
   chat_room& room_;
   chat_message read_msg_;
   chat_message_queue write_msgs_;
+  Request_Handler handler_;
 };
 
 //----------------------------------------------------------------------
