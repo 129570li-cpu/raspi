@@ -13,6 +13,9 @@ if(BUILD_CHATROOM)
     add_subdirectory(chatroom)
 endif()
 
+if(BUILD_CLIENT)
+    add_subdirectory(client)
+endif()
 
 
 

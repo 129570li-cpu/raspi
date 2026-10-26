@@ -11,6 +11,7 @@ if(WIN32)
     )
 
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(nlohmann_json CONFIG REQUIRED)
     # Linux：构建服务端
     add_executable(chat_server chat_server.cpp
             Request_Handler.cpp
@@ -18,5 +19,6 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
     target_link_libraries(chat_server PRIVATE
             Boost::headers
+            nlohmann_json::nlohmann_json
     )
 endif()

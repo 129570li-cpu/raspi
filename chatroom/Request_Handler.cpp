@@ -3,30 +3,60 @@
 //
 
 #include "Request_Handler.h"
-#include "Request_Handler.h"
-
 #include <unistd.h>
 #include <sys/sysinfo.h>
 #include <string>
+#include <nlohmann/json.hpp>
 
+using json = nlohmann::json;
 // 请求分发
 std::string Request_Handler::handle(const std::string& request)
 {
-    if (request == "GET_HOSTNAME")
+    try
     {
-        return get_hostname();
-    }
+        json req = json::parse(request);
 
-    if (request == "GET_SYSTEM_INFO")
-    {
-        return get_system_info();
-    }
+        std::string type = req.at("type").get<std::string>();
 
-    if (request == "GET_CPU_USAGE")
-    {
-        return get_cpu_usage();
+        json response = {
+            {"type", type},
+            {"request_id", req.value("request_id", 0)},
+            {"success", true}
+        };
+
+        if (type == "GET_HOSTNAME")
+        {
+            response["data"] = {
+                {"hostname", get_hostname()}
+            };
+        }
+        else if (type == "GET_SYSTEM_INFO")
+        {
+            response["data"] = {
+                {"system_info", get_system_info()}
+            };
+        }
+        else if (type == "GET_CPU_USAGE")
+        {
+            response["data"] = {
+                {"cpu_usage", get_cpu_usage()}
+            };
+        }
+        else
+        {
+            response["success"] = false;
+            response["error"] = "UNKNOWN_COMMAND";
+        }
+
+        return response.dump();
     }
-    return "UNKNOWN_COMMAND";
+    catch (const std::exception& e)
+    {
+        return json{
+                {"success", false},
+                {"error", e.what()}
+        }.dump();
+    }
 }
 
 // 获取主机名
