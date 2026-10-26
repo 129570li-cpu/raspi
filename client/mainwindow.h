@@ -4,7 +4,7 @@
 
 #ifndef RASPI_MAINWINDOW_H
 #define RASPI_MAINWINDOW_H
-
+#include "TcpClient.h"
 #include <QMainWindow>
 
 
@@ -20,6 +20,7 @@ public:
     ~MainWindow() override;
 
 private:
+    TcpClient client_;
     Ui::MainWindow *ui;
 };
 

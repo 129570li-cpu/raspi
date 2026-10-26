@@ -1,34 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-    <author/>
-    <comment/>
-    <exportmacro/>
-    <class>MainWindow</class>
-    <widget class="QMainWindow" name="MainWindow">
-        <property name="geometry">
-            <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>400</width>
-                <height>300</height>
-            </rect>
-        </property>
-        <property name="windowTitle">
-            <string>MainWindow</string>
-        </property>
-        <widget class="QWidget" name="centralwidget"/>
-        <widget class="QMenuBar" name="menubar">
-            <property name="geometry">
-                <rect>
-                    <x>0</x>
-                    <y>0</y>
-                    <width>400</width>
-                    <height>17</height>
-                </rect>
-            </property>
-        </widget>
-        <widget class="QStatusBar" name="statusbar"/>
-    </widget>
-    <pixmapfunction/>
-    <connections/>
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>695</width>
+    <height>581</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QPushButton" name="connectButton">
+      <property name="text">
+       <string>连接到树莓派</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="GET_HOSTNAMEButton">
+      <property name="text">
+       <string>获取主机名</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTextEdit" name="responseEdit">
+      <property name="maximumSize">
+       <size>
+        <width>100</width>
+        <height>100</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>695</width>
+     <height>33</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
 </ui>
