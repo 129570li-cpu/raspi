@@ -30,11 +30,25 @@
      </widget>
     </item>
     <item>
+     <widget class="QPushButton" name="getSystemInfoButton">
+      <property name="text">
+       <string>获取系统信息</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="getCpuUsageButton">
+      <property name="text">
+       <string>获取cpu使用效率</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QTextEdit" name="responseEdit">
       <property name="maximumSize">
        <size>
-        <width>100</width>
-        <height>100</height>
+        <width>500</width>
+        <height>500</height>
        </size>
       </property>
      </widget>

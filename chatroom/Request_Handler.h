@@ -5,7 +5,7 @@
 #ifndef RASPI_REQUEST_HANDLER_H
 #define RASPI_REQUEST_HANDLER_H
 #include <string>
-
+#include <nlohmann/json.hpp>
 
 class Request_Handler {
 public:
@@ -22,9 +22,9 @@ private:
     bool has_previous_cpu_ = false;
 
     CpuTimes read_cpu_times();
-    std::string get_cpu_usage();
+    nlohmann::json get_system_info();
+    nlohmann::json get_cpu_usage();
     std::string get_hostname();
-    std::string get_system_info();
 };
 
 

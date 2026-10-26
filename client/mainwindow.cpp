@@ -19,9 +19,28 @@ MainWindow::MainWindow(QWidget *parent) :
     this, [this]() {
         QJsonObject request;
         request["type"] = "GET_HOSTNAME";
+        request["request_id"] = 1;
         client_.sendRequest(request);
     });
+    connect(ui->getSystemInfoButton, &QPushButton::clicked,
+        this, [this]()
+{
+    QJsonObject request;
+    request["type"] = "GET_SYSTEM_INFO";
+    request["request_id"] = 2;
 
+    client_.sendRequest(request);
+});
+
+    connect(ui->getCpuUsageButton, &QPushButton::clicked,
+            this, [this]()
+    {
+        QJsonObject request;
+        request["type"] = "GET_CPU_USAGE";
+        request["request_id"] = 3;
+
+        client_.sendRequest(request);
+    });
     connect(&client_, &TcpClient::connected,
             this, [this]() {
                 statusBar()->showMessage("树莓派连接成功");

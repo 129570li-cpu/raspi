@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <sys/sysinfo.h>
 #include <string>
-#include <nlohmann/json.hpp>
+
 
 using json = nlohmann::json;
 // 请求分发
@@ -32,9 +32,7 @@ std::string Request_Handler::handle(const std::string& request)
         }
         else if (type == "GET_SYSTEM_INFO")
         {
-            response["data"] = {
-                {"system_info", get_system_info()}
-            };
+            response["data"] = get_system_info();
         }
         else if (type == "GET_CPU_USAGE")
         {
@@ -74,29 +72,26 @@ std::string Request_Handler::get_hostname()
 }
 
 // 获取系统信息
-std::string Request_Handler::get_system_info()
+json Request_Handler::get_system_info()
 {
     struct sysinfo info{};
 
     if (sysinfo(&info) != 0)
     {
-        return "ERROR: sysinfo failed";
+        throw std::runtime_error("sysinfo failed");
     }
 
-    // sysinfo 的内存值需要乘以 mem_unit
     const auto total_memory =
         static_cast<unsigned long long>(info.totalram) * info.mem_unit;
 
     const auto free_memory =
         static_cast<unsigned long long>(info.freeram) * info.mem_unit;
 
-    std::string result;
-
-    result += "Uptime: " + std::to_string(info.uptime) + " seconds\n";
-    result += "Total memory: " + std::to_string(total_memory / 1024 / 1024) + " MB\n";
-    result += "Free memory: " + std::to_string(free_memory / 1024 / 1024) + " MB";
-
-    return result;
+    return {
+            {"uptime", info.uptime},
+            {"memory_total_mb", total_memory / 1024 / 1024},
+            {"memory_free_mb", free_memory / 1024 / 1024}
+    };
 }
 
 #include <fstream>
@@ -138,7 +133,7 @@ Request_Handler::CpuTimes Request_Handler::read_cpu_times()
     return result;
 }
 
-std::string Request_Handler::get_cpu_usage()
+json Request_Handler::get_cpu_usage()
 {
     CpuTimes current = read_cpu_times();
 
@@ -146,7 +141,8 @@ std::string Request_Handler::get_cpu_usage()
     {
         previous_cpu_ = current;
         has_previous_cpu_ = true;
-        return "CPU Usage: sampling";
+
+        return nullptr;
     }
 
     const auto total_delta =
@@ -158,15 +154,12 @@ std::string Request_Handler::get_cpu_usage()
     previous_cpu_ = current;
 
     if (total_delta == 0)
-        return "CPU Usage: unavailable";
+    {
+        return nullptr;
+    }
 
     double usage = 100.0 *
         (1.0 - static_cast<double>(idle_delta) / total_delta);
 
-    std::ostringstream oss;
-    oss << "CPU Usage: "
-        << std::fixed << std::setprecision(1)
-        << usage << "%";
-
-    return oss.str();
+    return usage;
 }
